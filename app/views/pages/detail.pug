@@ -1,0 +1,151 @@
+extends ../layout
+
+block content
+   .container
+      .row
+         .col-md-7.col-sm-12
+            if movie.poster.indexOf('http') > -1
+               img#poster.card-img-top(src=movie.poster,alt=movie.title,width:100)
+            else
+               img#poster.card-img-top(src='/upload/'+ movie.poster,alt=movie.title,width:100)
+         .col-md-5
+            .dl-horizontal
+               dt 电影名称
+               dd #{movie.title}
+               dt 导演
+               dd #{movie.director}
+               dt 国家
+               dd #{movie.country}
+               dt 上映年份
+               dd #{movie.year}
+               dt 简介
+               dd #{movie.summary}
+            .card
+               .card-header
+                  h4 评论区
+               .card-body
+                  if comments && comments.length > 0
+                     each comment in comments
+                        .media.mb-3
+                           a.comment.mr-3(href='javascript:;',data-cid=comment._id,data-tid=comment.from._id)
+                              img(src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZWVlIi8+PHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMzIiIHk9IjMyIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjEycHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+NjR4NjQ8L3RleHQ+PC9zdmc+' alt='')
+                           .media-body
+                              h5 #{comment.from.nickname}
+                              | #{comment.content}
+                              if comment.replies && comment.replies.length > 0
+                                 each reply in comment.replies
+                                    .media.mb-3
+                                       a.comment.mr-3(href='#',data-cid=reply._id,data-tid=reply.from._id)
+                                          img(src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZWVlIi8+PHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMzIiIHk9IjMyIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjEycHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+NjR4NjQ8L3RleHQ+PC9zdmc+' alt='')
+                                       .media-body
+                                          h5 #{reply.from.nickname} 回复 #{reply.to.nickname}:
+                                          | #{reply.content}
+                  #comment
+                     form#commentForm(method='POST' action='/comment')
+                        .form-group.row(style={'display': 'none'})
+                           input(name='comment[movie]' value=movie._id)
+                           if user
+                              input(name='comment[from]' value=user._id)
+                              input#toId(name='comment[tid]')
+                              input#commentId(name='comment[cid]')
+                        if user
+                           .form-group.row
+                              textarea.form-control(type='text' placeholder='填写评论',row=3,name='comment[content]')
+                           .form-group.row
+                              button#commentSubmit.btn.btn-success(type='submit') 提交评论
+                        else
+                           .form-group.row
+                              a.navbar-link(href='#' data-toggle='modal' data-target='#signinModal') 登录后再评论
+   script.
+      $(function(){
+         var url = window.location.href
+         console.log(url)
+         $('.comment').click(function(e){
+            var target = $(this)
+            let tid = target.data('tid')
+            let cid = target.data('cid')
+            $('#commentId').val(cid)
+            $("#toId").val(tid)
+         })
+         $('#commentSubmit').click(function(e){
+            e.preventDefault()
+            $.ajax({
+               type: 'POST',
+               url: '/comment',
+               data: $("#commentForm").serialize()
+            }).done(function(results){
+               if (results.success) {
+                  window.location.reload()
+               }
+            })
+         })
+
+         $.ajax({
+            //为什么一定要POST
+            type: 'POST',
+            url: '/wechat/signature?url=' + encodeURIComponent(url),
+         })
+         .done(function(results){
+            if (results.success) {
+               var data = results.data
+               wx.config({
+                  debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                  appId: data.appId, // 必填，公众号的唯一标识
+                  timestamp: data.timestamp, // 必填，生成签名的时间戳
+                  nonceStr: data.noncestr, // 必填，生成签名的随机串
+                  signature: data.signature,// 必填，签名
+                  jsApiList: [
+                     "updateAppMessageShareData",
+                     "onMenuShareTimeline",
+                     "onMenuShareAppMessage",
+                     'translateVoice'
+                  ] // 必填，需要使用的JS接口列表
+               });
+            }  
+         })
+
+         wx.ready(function () {   //需在用户可能点击分享按钮前就先调用
+         console.log('ok')
+            wx.checkJsApi({
+               jsApiList: [
+                  "updateAppMessageShareData",
+                  "onMenuShareTimeline",
+                  "onMenuShareAppMessage",
+                  "translateVoice"
+               ], 
+               success: function(res) {
+                  console.log(res)
+                  // 以键值对的形式返回，可用的api值true，不可用为false
+               // 如：{"checkResult":{"chooseImage":true},"errMsg":"checkJsApi:ok"}
+               }
+            });
+            let shareContent = { 
+               title: '#{movie.title}', // 分享标题
+               desc: '#{movie.summary}', // 分享描述
+               link: window.location.origin, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+               imgUrl: '#{movie.poster}', // 分享图标
+               success: function () {
+                  window.alert('分享成功')
+               }
+            }
+            wx.onMenuShareAppMessages(shareContent)
+         });
+         wx.error(function(res){
+            console.log(res)
+         // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+         }); 
+
+         var slides = {
+            current: '#{movie.poster}',
+            urls:['#{movie.poster}']
+         }
+
+         $('#poster').click(function(e){
+            wx.previewImage(slides)
+         })
+
+      })
+
+
+
+

@@ -1,0 +1,43 @@
+{
+  "name": "wechat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app",
+    "script": "bash ./script/script.sh",
+    "precommit": "standard app/**/*.js wechat/**/*.js webchat-lib/**/*.js | snazzy "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "content-type": "^1.0.4",
+    "crypt": "0.0.2",
+    "ejs": "^2.7.1",
+    "glob": "^7.1.4",
+    "koa": "^2.8.1",
+    "koa-body": "^4.1.1",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "koa-session": "^5.12.3",
+    "koa-static": "^5.0.0",
+    "koa-views": "^6.2.1",
+    "moment": "^2.24.0",
+    "mongoose": "^5.6.11",
+    "pug": "^2.0.4",
+    "raw-body": "^2.4.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
+    "sha1": "^1.1.1",
+    "util": "^0.12.1",
+    "xml2js": "^0.4.21"
+  },
+  "devDependencies": {
+    "husky": "^3.0.5",
+    "snazzy": "^8.0.0",
+    "standard": "^14.2.0"
+  }
+}

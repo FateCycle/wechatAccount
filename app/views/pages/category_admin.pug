@@ -1,0 +1,12 @@
+extends ../layout
+
+block content
+   .container
+      .row
+         form.form-horizontal(method='POST',action='/admin/category')
+            .form-group.row
+               label(for='inputCate') 电影分类
+               input#inputCate.form-control(name='category[name]',value=category.name,type='text')
+            .form-group.row
+               button.btn.btn-default(type='submit') 录入
+            

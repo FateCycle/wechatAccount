@@ -1,0 +1,26 @@
+extends ../layout
+
+block content
+   .container
+      .row
+         each elem in movies
+            .col-sm-3
+               .card(style={"margin-bottom":"30px"})
+                  a(href='/movie/' + elem._id)
+                     if elem.poster.indexOf('http') > -1
+                        img.card-img-top(src=elem.poster,alt=elem.title,height=375)
+                     else
+                        img.card-img-top(src='/upload/'+ elem.poster,alt=elem.title)
+                  .cart-body(style={"text-align":"center","padding":"4px 0"})
+                     a.card-link(href= '/movie/' + elem._id) #{elem.title}
+      nav
+         ul.pagination
+            - for (let i=1;i<=totalPage;i++) {
+               - if (i===currentPage) {
+                  li.page-item.active
+                     a.page-link #{i}
+               - } else {
+                  li.page-item
+                     a.page-link(href='/results?'+ query + '&p=' + (i-1) ) #{i}
+               - } 
+            - }
